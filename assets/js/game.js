@@ -1,9 +1,9 @@
-// المتغيرات العامة للعبة
+// المتغيرات العامة
 let currentScore = 0;
 let currentQuestionIndex = 0;
-let gameData = []; // هنا سنخزن الأسئلة القادمة من الملف
+let gameData = [];
 
-// عناصر DOM التي سنحتاج للتحكم بها
+// عناصر الصفحة
 const ui = {
     questionText: document.getElementById('question-text'),
     scoreCounter: document.getElementById('score-counter'),
@@ -15,53 +15,45 @@ const ui = {
     nextBtn: document.getElementById('next-question-btn')
 };
 
-// --- 1. تشغيل اللعبة عند البداية ---
+// تشغيل اللعبة عند التحميل
 document.addEventListener('DOMContentLoaded', () => {
     fetchQuestions();
     setupEventListeners();
 });
 
-// --- 2. جلب الأسئلة من ملف JSON ---
+// جلب الأسئلة
 async function fetchQuestions() {
     try {
         const response = await fetch('data/questions.json');
-        if (!response.ok) throw new Error("لم نتمكن من قراءة ملف الأسئلة");
-        
+        if (!response.ok) throw new Error("فشل تحميل ملف الأسئلة");
         gameData = await response.json();
         loadQuestion(currentQuestionIndex);
-        
     } catch (error) {
-        console.error("Error loading questions:", error);
-        ui.questionText.innerText = "تنبيه: لا يمكن قراءة ملف البيانات محلياً مباشرة بسبب حماية المتصفح.\n يرجى تشغيل 'Live Server' أو رفع الملفات على سيرفر.";
+        console.error(error);
+        ui.questionText.innerText = "خطأ: تأكد من تشغيل اللعبة عبر سيرفر محلي (Live Server)";
         ui.questionText.style.color = "red";
-        ui.questionText.style.fontSize = "1rem";
     }
 }
 
-// --- 3. عرض السؤال والبطاقات ---
+// عرض السؤال والبطاقات
 function loadQuestion(index) {
-    // التأكد من وجود أسئلة
     if (index >= gameData.length) {
-        ui.questionText.innerText = "انتهت جميع الأسئلة! 🥳";
+        ui.questionText.innerText = "انتهت الأسئلة!";
         ui.board.innerHTML = "";
         return;
     }
 
     const data = gameData[index];
     ui.questionText.innerText = data.question;
-    ui.board.innerHTML = ''; // تنظيف البورد
+    ui.board.innerHTML = ''; 
     ui.messageArea.innerText = '';
     ui.input.value = '';
 
-    // توليد البطاقات
     data.answers.forEach((ans, i) => {
-        // إنشاء عنصر البطاقة HTML
         const card = document.createElement('div');
         card.className = 'card';
         card.id = `card-${i}`;
-        card.dataset.text = ans.text;   // تخزين النص للمقارنة
-        card.dataset.points = ans.points; // تخزين النقاط
-
+        
         card.innerHTML = `
             <div class="card-inner">
                 <div class="card-front">${i + 1}</div>
@@ -71,15 +63,11 @@ function loadQuestion(index) {
                 </div>
             </div>
         `;
-        
-        // (اختياري) السماح بقلب البطاقة بالضغط عليها مباشرة
-        card.addEventListener('click', () => flipCard(card, ans.points));
-        
         ui.board.appendChild(card);
     });
 }
 
-// --- 4. معالجة الإدخال (التأكد من الإجابة) ---
+// التحقق من الإجابة
 function checkAnswer() {
     const userText = normalizeText(ui.input.value);
     if (!userText) return;
@@ -87,100 +75,49 @@ function checkAnswer() {
     let found = false;
     const currentAnswers = gameData[currentQuestionIndex].answers;
 
-    // البحث في الإجابات
     currentAnswers.forEach((ans, i) => {
-        // إذا تطابق النص ولم تكن البطاقة مقلوبة مسبقاً
         if (normalizeText(ans.text) === userText) {
             const card = document.getElementById(`card-${i}`);
             if (!card.classList.contains('flipped')) {
-                flipCard(card, ans.points);
+                card.classList.add('flipped');
+                currentScore += ans.points;
+                ui.scoreCounter.innerText = currentScore;
                 found = true;
-            } else {
-                showMessage("تم كشف هذه الإجابة مسبقاً!", "orange");
-                found = true;
+                ui.messageArea.innerText = "✅ إجابة صحيحة!";
+                ui.messageArea.style.color = "green";
+                ui.input.value = ''; 
             }
         }
     });
 
     if (!found) {
-        showMessage("❌ إجابة خاطئة!", "red");
-        triggerWrongEffect();
-    } else {
-        showMessage("✅ إجابة صحيحة!", "green");
-        ui.input.value = ''; // تفريغ الخانة فقط عند الإجابة الصحيحة
+        ui.messageArea.innerText = "❌ إجابة خاطئة!";
+        ui.messageArea.style.color = "red";
     }
-    
-    ui.input.focus(); // إعادة المؤشر للكتابة
 }
 
-// --- 5. وظيفة قلب البطاقة واحتساب النقاط ---
-function flipCard(cardElement, points) {
-    if (cardElement.classList.contains('flipped')) return;
-    
-    cardElement.classList.add('flipped');
-    currentScore += points;
-    updateScore();
-}
-
-function updateScore() {
-    ui.scoreCounter.innerText = currentScore;
-}
-
-// --- 6. خوارزمية توحيد النصوص (الذكاء) ---
+// توحيد النصوص (لتجاهل الهمزات والتاء المربوطة)
 function normalizeText(text) {
     if (!text) return "";
     let normalized = text.trim();
-    
-    // إزالة التشكيل
-    normalized = normalized.replace(/([^\u0621-\u063A\u0641-\u064A\u0660-\u0669a-zA-Z 0-9])/g, '');
-    
-    // توحيد الألف (أ إ آ -> ا)
+    normalized = normalized.replace(/([^\u0621-\u063A\u0641-\u064A\u0660-\u0669a-zA-Z 0-9])/g, ''); // إزالة التشكيل
     normalized = normalized.replace(/(آ|إ|أ)/g, 'ا');
-    
-    // توحيد التاء المربوطة والهاء (ة -> ه)
     normalized = normalized.replace(/(ة)/g, 'ه');
-    
-    // توحيد الياء (ى -> ي)
     normalized = normalized.replace(/(ى)/g, 'ي');
-
-    // إزالة "ال" التعريف من البداية (اختياري، يسهل اللعب)
-    if (normalized.startsWith("ال") && normalized.length > 3) {
-        normalized = normalized.substring(2);
-    }
-
+    if (normalized.startsWith("ال") && normalized.length > 3) normalized = normalized.substring(2);
     return normalized;
 }
 
-// --- 7. المؤثرات والتحكم ---
-function showMessage(msg, color) {
-    ui.messageArea.innerText = msg;
-    ui.messageArea.style.color = color;
-    setTimeout(() => { ui.messageArea.innerText = ''; }, 2000);
-}
-
-function triggerWrongEffect() {
-    document.body.style.backgroundColor = "#500"; // وميض أحمر
-    setTimeout(() => {
-        document.body.style.backgroundColor = "var(--main-bg)";
-    }, 200);
-}
-
+// تفعيل الأزرار
 function setupEventListeners() {
-    // زر الإدخال
     ui.submitBtn.addEventListener('click', checkAnswer);
-    
-    // زر Enter في لوحة المفاتيح
     ui.input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') checkAnswer();
     });
-
-    // زر الخطأ (X)
     ui.wrongBtn.addEventListener('click', () => {
-        triggerWrongEffect();
-        showMessage("خطـــــــأ !!", "red");
+        ui.messageArea.innerText = "خطأ X";
+        ui.messageArea.style.color = "red";
     });
-
-    // زر السؤال التالي
     ui.nextBtn.addEventListener('click', () => {
         currentQuestionIndex++;
         loadQuestion(currentQuestionIndex);
