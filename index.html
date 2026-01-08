@@ -4,40 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لعبة جوابك جوابهم</title>
-    
     <link rel="stylesheet" href="assets/css/style.css">
-    
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="main-container">
-        
-        <header class="game-header">
-            <div class="score-box">
-                <span>النقاط: </span>
-                <span id="score-counter">0</span>
-            </div>
-            <h1 id="question-text">جاري تحميل السؤال...</h1>
-        </header>
-
-        <main id="game-board" class="cards-grid">
-            </main>
-
-        <footer class="control-panel">
-            <div class="input-group">
-                <input type="text" id="answer-input" placeholder="اكتب الإجابة هنا..." autocomplete="off">
-                <button id="submit-btn">كشف الإجابة</button>
-            </div>
-            <div id="message-area" class="feedback-msg"></div>
+    <section id="setup-screen" class="screen active">
+        <div class="setup-box">
+            <h1>إعدادات المباراة ⚔️</h1>
             
-            <div class="admin-controls">
-                <button id="wrong-answer-btn" class="danger-btn">تسجيل خطأ (X)</button>
-                <button id="next-question-btn" class="secondary-btn">السؤال التالي</button>
+            <div class="input-group-vertical">
+                <label>اسم الفريق الأول (يمين)</label>
+                <input type="text" id="team1-name-input" placeholder="مثال: فريق الأسود" value="الفريق الأول">
             </div>
-        </footer>
 
-    </div>
+            <div class="input-group-vertical">
+                <label>اسم الفريق الثاني (يسار)</label>
+                <input type="text" id="team2-name-input" placeholder="مثال: فريق النمور" value="الفريق الثاني">
+            </div>
+
+            <button id="start-game-btn" class="primary-btn">ابدأ التحدي!</button>
+        </div>
+    </section>
+
+    <section id="game-screen" class="screen hidden">
+        <div class="main-container">
+            
+            <header class="game-header">
+                <div class="team-score-box" id="team1-box">
+                    <span id="team1-name-display">الفريق 1</span>
+                    <div class="score-digit" id="score1">0</div>
+                </div>
+
+                <div class="question-box">
+                    <h2 id="question-text">جاري تحميل السؤال...</h2>
+                </div>
+
+                <div class="team-score-box" id="team2-box">
+                    <div class="score-digit" id="score2">0</div>
+                    <span id="team2-name-display">الفريق 2</span>
+                </div>
+            </header>
+
+            <main id="game-board" class="cards-grid">
+                </main>
+
+            <footer class="control-panel">
+                <div class="input-group">
+                    <input type="text" id="answer-input" placeholder="اكتب الإجابة هنا..." autocomplete="off">
+                    <button id="submit-btn">كشف</button>
+                </div>
+                <div id="message-area" class="feedback-msg"></div>
+                
+                <div class="admin-controls">
+                    <button id="add-team1" class="team-btn">نقطة لليمين</button>
+                    <button id="wrong-answer-btn" class="danger-btn">خطأ (X)</button>
+                    <button id="add-team2" class="team-btn">نقطة لليسار</button>
+                    <button id="next-question-btn" class="secondary-btn">السؤال التالي</button>
+                </div>
+            </footer>
+
+        </div>
+    </section>
 
     <script src="assets/js/game.js"></script>
 </body>
