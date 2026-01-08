@@ -1,1 +1,192 @@
+/* متغيرات الألوان لتسهيل التعديل لاحقاً */
+:root {
+    --main-bg: #0d1b2a;       /* خلفية الشاشة */
+    --card-back: #003566;     /* لون البطاقة وهي مقلوبة */
+    --card-face: #e0e1dd;     /* لون البطاقة وهي مكشوفة */
+    --accent: #ffc300;        /* اللون الذهبي للإطار */
+    --text-main: #ffffff;
+    --text-dark: #000000;
+}
 
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--main-bg);
+    color: var(--text-main);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden; /* منع التمرير الجانبي */
+}
+
+.main-container {
+    width: 95%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --- رأس اللعبة --- */
+.game-header {
+    background: linear-gradient(180deg, #001d3d, #003566);
+    border: 3px solid var(--accent);
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(255, 195, 0, 0.3);
+    position: relative;
+}
+
+#question-text {
+    margin: 10px 0 0 0;
+    font-size: 1.5rem;
+}
+
+.score-box {
+    background-color: black;
+    border: 2px solid white;
+    padding: 5px 15px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: inline-block;
+    color: var(--accent);
+}
+
+/* --- شبكة البطاقات (6 إجابات) --- */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* عمودين */
+    gap: 15px;
+    perspective: 1000px; /* لعمل تأثير الـ 3D */
+}
+
+/* --- تصميم البطاقة --- */
+.card {
+    background-color: transparent;
+    height: 70px; /* ارتفاع البطاقة */
+    cursor: pointer;
+    position: relative;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* كلاس نضيفه بالجافاسكربت لقلب البطاقة */
+.card.flipped .card-inner {
+    transform: rotateX(180deg);
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden; /* إخفاء ظهر العنصر */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 2px solid white;
+    font-weight: bold;
+}
+
+/* الوجه الأمامي (المخفي - الرقم) */
+.card-front {
+    background: linear-gradient(135deg, var(--card-back), #001d3d);
+    color: var(--accent);
+    font-size: 2rem;
+    font-family: monospace; /* لجعل الأرقام تشبه النمط الرقمي */
+    border: 2px solid var(--accent);
+}
+
+/* الوجه الخلفي (المكشوف - الإجابة) */
+.card-back {
+    background-color: var(--card-face);
+    color: var(--text-dark);
+    transform: rotateX(180deg);
+    justify-content: space-between; /* يباعد بين النص والنقاط */
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.points-badge {
+    background-color: var(--main-bg);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* --- لوحة التحكم السفلية --- */
+.control-panel {
+    background-color: #1b263b;
+    padding: 15px;
+    border-radius: 10px;
+    border-top: 4px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    border: none;
+    text-align: center;
+    font-family: 'Cairo', sans-serif;
+}
+
+button {
+    padding: 10px 20px;
+    font-family: 'Cairo', sans-serif;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#submit-btn { background-color: var(--accent); color: black; }
+#submit-btn:hover { background-color: #e0ac00; }
+
+.admin-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+.danger-btn { background-color: #d90429; color: white; }
+.danger-btn:hover { background-color: #ef233c; }
+
+.secondary-btn { background-color: #8d99ae; color: black; }
+
+.feedback-msg {
+    color: #ff4d4d;
+    height: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* --- التجاوب مع الجوال --- */
+@media (max-width: 600px) {
+    .cards-grid {
+        grid-template-columns: 1fr; /* عمود واحد فقط */
+    }
+    .card { height: 60px; }
+    h1 { font-size: 1.2rem; }
+}
